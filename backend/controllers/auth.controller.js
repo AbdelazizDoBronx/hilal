@@ -64,7 +64,6 @@ export const login = async (req, res) => {
 
         // Check if user exists
         const user = await findUserByEmail(userEmail);
-        console.log(user);
         if (!user) {
             return res.status(401).json({ message: "Invalid email or password" });
         }
@@ -81,7 +80,6 @@ export const login = async (req, res) => {
         return res.status(200).json({ message: "Login successful" });
 
     } catch (err) {
-        console.error("Login Error:", err);
         return res.status(500).json({ message: "Server error" });
     }
 };
@@ -92,8 +90,7 @@ export const logout = async (req, res) => {
          res.cookie("jwt", "", { maxAge: 0 });
          return res.status(200).json({ message: "Logged out successfully" });
     } catch (err) {
-        console.error("Logout Error:", err);
-        return res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error",err });
     }
 };
 

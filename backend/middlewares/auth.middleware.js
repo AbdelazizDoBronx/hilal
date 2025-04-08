@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 export const authMiddleware  =  (req,res,next) => {
     // get token from request object
     const token = req.cookies.jwt;
-
+    console.log(token);
     if(!token){
         return res.status(403).json({
             message: "access denied! Unauthoriezed"

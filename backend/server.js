@@ -1,12 +1,15 @@
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import dotenv from 'dotenv'
 import authRoutes from './routes/auth.route.js'
 import productsRoutes from './routes/product.route.js'
 import ordersRoutes from './routes/order.route.js'
 
 // Express server initialisation
 const app = express();
+
+dotenv.config();
 
 // Middlewares
 // Json middleware so we can retrive back data from res object in json format
@@ -23,12 +26,15 @@ app.use(cors({
 
 // Routes
 // Auth routes
-app.use('/api',authRoutes)
+app.use('/api',authRoutes);
 // Products routes
-app.use('/api',productsRoutes)
+app.use('/api',productsRoutes);
 // Orders routes
-app.use('/api',ordersRoutes)
+app.use('/api',ordersRoutes);
 
-app.listen(3001,()=>{
-    console.log('server is up and runing!')
+
+
+const PORT = process.env.PORT;
+app.listen(PORT,()=>{
+    console.log('server is up and runing on port: ',PORT);
 })

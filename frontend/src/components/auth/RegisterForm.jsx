@@ -32,7 +32,7 @@ export default function RegisterForm() {
     });
 
     if (result.success) {
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => navigate('/dashboard'), 2000);
     }
   };
 
