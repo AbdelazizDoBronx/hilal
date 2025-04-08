@@ -2,7 +2,7 @@ import express from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import authRoutes from './routes/auth.route.js'
-import { db, query } from './config/db.js';
+import productsRoutes from './routes/product.route.js'
 
 // Express server initialisation
 const app = express();
@@ -21,7 +21,10 @@ app.use(cors({
 
 
 // Routes
+// Auth routes
 app.use('/api',authRoutes)
+// Products routes
+app.use('/api',productsRoutes)
 
 
 app.listen(3001,()=>{
