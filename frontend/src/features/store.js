@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { apiSlice } from './apiSlice';
-import userReducer from './userSlice';
+import { apiSlice } from './api/apiSlice';
+import userReducer from './user/userSlice';
 
 const store = configureStore({
   reducer: {
@@ -9,6 +9,7 @@ const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(apiSlice.middleware),
+  devTools: process.env.NODE_ENV !== 'production',
 });
 
 export default store;

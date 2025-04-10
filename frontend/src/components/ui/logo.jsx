@@ -5,6 +5,9 @@ const Logo = ({ variant = 'default', size = 'md', className = '' }) => {
     light: '/images/logos/Untitled-2-04.png',
     minimal: '/images/logos/Untitled-2-08.png',
     symbol: '/images/logos/Untitled-2-06.png',
+    symbol_only: "/images/logos/Untitled-2-03.png",
+    full_logo: "/images/logos/Untitled-2-01.png",
+    text_only: "/images/logos/Untitled-2-07.png",
   };
 
   
