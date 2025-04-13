@@ -1,6 +1,6 @@
 import express from 'express'
 import { checkAuth, login, logout, register } from '../controllers/auth.controller.js';
-import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { authMiddleware, adminMiddleware } from '../middlewares/auth.middleware.js';
 
 // Routes
 const router = express.Router();
@@ -18,4 +18,9 @@ router.post('/logout',logout)
 // check is user authenticeated
 router.get('/check-auth',authMiddleware,checkAuth)
 
-export default router
+// Admin only routes
+router.get('/admin-only', authMiddleware, adminMiddleware, (req, res) => {
+    res.json({ message: "Admin access granted" });
+});
+
+export default router;

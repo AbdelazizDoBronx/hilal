@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import MiniSidebar from './MiniSidebar';
 import { motion, AnimatePresence } from 'framer-motion';
 import MainContent from '../ui/MainContent';
 
@@ -15,7 +16,8 @@ const Layout = ({ children }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden">
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      
+      <MiniSidebar isVisible={!isSidebarOpen} />
+
       <AnimatePresence mode="wait">
         {mounted && (
           <motion.main

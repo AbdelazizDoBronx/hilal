@@ -10,6 +10,7 @@ export const productApiSlice = apiSlice.injectEndpoints({
       query: (product) => ({
         url: 'products',
         method: 'POST',
+        credentials: "include",
         body: product,
       }),
       invalidatesTags: ['Products'],
@@ -18,6 +19,7 @@ export const productApiSlice = apiSlice.injectEndpoints({
       query: ({ id, ...product }) => ({
         url: `products/${id}`,
         method: 'PUT',
+        credentials: "include",
         body: product,
       }),
       invalidatesTags: ['Products'],
@@ -26,6 +28,7 @@ export const productApiSlice = apiSlice.injectEndpoints({
       query: (id) => ({
         url: `products/${id}`,
         method: 'DELETE',
+        credentials: "include"
       }),
       invalidatesTags: ['Products'],
     }),

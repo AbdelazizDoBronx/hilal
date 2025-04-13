@@ -11,7 +11,13 @@ export const authMiddleware  =  (req,res,next) => {
 
     // decode token using jsonwebtoken
     const decode =  jwt.verify(token,process.env.JWT_SECRET_KEY);
-
+    req.user = {
+        username: decode.username,
+        useremail: decode.useremail,
+        id: decode.id,
+        role: decode.role
+    };
+    next();
     if(!decode){
         return res.status(402).json({
             message: "bad token"
@@ -23,5 +29,15 @@ export const authMiddleware  =  (req,res,next) => {
     
     req.user = user;
 
-    next();
+    
+}
+
+export const adminMiddleware = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        return res.status(403).json({
+            message: "Access denied! Admin rights required"
+        });
+    }
 }

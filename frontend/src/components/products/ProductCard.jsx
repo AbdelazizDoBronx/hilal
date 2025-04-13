@@ -1,7 +1,7 @@
 import { Edit, Trash2, ShoppingCart, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const ProductCard = ({ product, onEdit, onDelete }) => {
+const ProductCard = ({ product, onEdit, onDelete, isAdmin }) => {
   // Convert price to number and handle potential invalid values
   const formatPrice = (price) => {
     const numPrice = Number(price);
@@ -26,6 +26,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
       <div className="p-5">
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-lg font-medium text-gray-900 line-clamp-1">{product.name}</h3>
+        {isAdmin && (  
           <div className="flex space-x-1">
             <motion.button 
               whileHover={{ scale: 1.1, backgroundColor: '#EEF2FF' }}
@@ -44,6 +45,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
               <Trash2 size={16} />
             </motion.button>
           </div>
+        )}
         </div>
         
         <div className="mb-4">

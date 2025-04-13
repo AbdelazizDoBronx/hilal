@@ -15,10 +15,15 @@ export default function RegisterForm() {
     {
       userName: '',
       userEmail: '',
-      userPassword: ''
+      userPassword: '',
+      secretKey: ''
     },
     async (userData) => {
-      const result = await register(userData).unwrap();
+      const dataToSend = {...userData};
+      if (!dataToSend.secretKey) {
+        delete dataToSend.secretKey;
+      }
+      const result = await register(dataToSend).unwrap();
       if (result) {
         setStatus({ type: 'success', message: 'Compte créé avec succès!' });
         setTimeout(() => navigate('/login'), 1500);
@@ -64,6 +69,15 @@ export default function RegisterForm() {
         value={values.userPassword}
         onChange={handleChange}
         required
+      />
+
+      <Input
+        icon={Lock}
+        type="password"
+        name="secretKey"
+        placeholder="Clé secrète (optionnel)"
+        value={values.secretKey}
+        onChange={handleChange}
       />
 
       <Button

@@ -7,9 +7,14 @@ import ProductsHeader from '../components/products/ProductsHeader';
 import ProductsSearch from '../components/products/ProductsSearch';
 import { ProductsLoading, ProductsEmpty } from '../components/products/ProductsEmptyState';
 import BackgroundParticles from '../components/ui/BackgroundParticles';
-
+import { useSelector } from 'react-redux';
 const Products = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    sortBy: 'name',
+    order: 'asc',
+    stock: 'all'
+  });
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -18,24 +23,8 @@ const Products = () => {
   const [updateProduct] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
 
-  const handleAddProduct = async (productData) => {
-    try {
-      await addProduct(productData).unwrap();
-      setShowForm(false);
-    } catch (error) {
-      console.error('Failed to add product:', error);
-    }
-  };
-
-  const handleUpdateProduct = async (productData) => {
-    try {
-      await updateProduct({ id: productData.id, ...productData }).unwrap();
-      setShowForm(false);
-      setSelectedProduct(null);
-    } catch (error) {
-      console.error('Failed to update product:', error);
-    }
-  };
+  const user = useSelector((state) => state.user.userInfo);
+  const isAdmin = user && user.role === 'admin';
 
   const handleDeleteProduct = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
@@ -43,14 +32,86 @@ const Products = () => {
         await deleteProduct(id).unwrap();
       } catch (error) {
         console.error('Failed to delete product:', error);
+        if (error.status === 401) {
+          console.error('Unauthorized - Please login again');
+        } else if (error.status === 403) {
+          console.error('Forbidden - Admin access required');
+        }
       }
     }
   };
+  
+  const handleUpdateProduct = async (productData) => {
+    try {
+      await updateProduct({ id: productData.id, ...productData }).unwrap();
+      setShowForm(false);
+      setSelectedProduct(null);
+    } catch (error) {
+      console.error('Failed to update product:', error);
+      if (error.status === 401) {
+        console.error('Unauthorized - Please login again');
+      } else if (error.status === 403) {
+        console.error('Forbidden - Admin access required');
+      }
+    }
+  };
+  
+  const handleAddProduct = async (productData) => {
+    try {
+      await addProduct(productData).unwrap();
+      setShowForm(false);
+    } catch (error) {
+      console.error('Failed to add product:', error);
+      if (error.status === 401) {
+        console.error('Unauthorized - Please login again');
+      } else if (error.status === 403) {
+        console.error('Forbidden - Admin access required');
+      }
+    }
+  };
+  
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filterProducts = (products) => {
+    let filtered = [...products];
 
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply stock filter
+    switch (filters.stock) {
+      case 'inStock':
+        filtered = filtered.filter(product => product.quantity > 10);
+        break;
+      case 'lowStock':
+        filtered = filtered.filter(product => product.quantity > 0 && product.quantity <= 10);
+        break;
+      case 'outOfStock':
+        filtered = filtered.filter(product => product.quantity === 0);
+        break;
+      default:
+        break;
+    }
+    // Apply sorting
+    filtered.sort((a, b) => {
+      const aValue = a[filters.sortBy];
+      const bValue = b[filters.sortBy];
+
+      if (typeof aValue === 'string') {
+        return filters.order === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+
+      return filters.order === 'asc' ? aValue - bValue : bValue - aValue;
+    });
+
+    return filtered;
+  };
+  const filteredProducts = filterProducts(products);
   return (
     <div className="relative">
       <BackgroundParticles />
@@ -61,6 +122,7 @@ const Products = () => {
             setSelectedProduct(null);
             setShowForm(true);
           }} 
+          showAddButton={isAdmin}
         />
 
         <motion.div 
@@ -72,6 +134,8 @@ const Products = () => {
           <ProductsSearch 
             searchTerm={searchTerm}
             onSearchChange={(e) => setSearchTerm(e.target.value)}
+            filters={filters}
+            onFilterChange={setFilters}
           />
 
           <div className="p-6">
@@ -105,11 +169,12 @@ const Products = () => {
                   >
                     <ProductCard
                       product={product}
-                      onEdit={(product) => {
+                      onEdit={isAdmin ? (product) => {
                         setSelectedProduct(product);
                         setShowForm(true);
-                      }}
-                      onDelete={handleDeleteProduct}
+                      } : null}
+                      onDelete={isAdmin ? handleDeleteProduct : null}
+                      isAdmin={isAdmin}
                     />
                   </motion.div>
                 ))}
@@ -120,16 +185,16 @@ const Products = () => {
       </div>
 
       <AnimatePresence>
-        {showForm && (
-          <ProductForm
-            product={selectedProduct}
-            onSubmit={selectedProduct ? handleUpdateProduct : handleAddProduct}
-            onClose={() => {
-              setShowForm(false);
-              setSelectedProduct(null);
-            }}
-          />
-        )}
+      {isAdmin && showForm && (
+        <ProductForm
+          product={selectedProduct}
+          onSubmit={selectedProduct ? handleUpdateProduct : handleAddProduct}
+          onClose={() => {
+            setShowForm(false);
+            setSelectedProduct(null);
+          }}
+        />
+      )}
       </AnimatePresence>
     </div>
   );

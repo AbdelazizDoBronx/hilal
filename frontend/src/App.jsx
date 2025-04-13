@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
+
 const App = () => {
   const dispatch = useDispatch();
   const token = localStorage.getItem('token');
@@ -18,9 +19,9 @@ const App = () => {
   const user = useSelector((state) => state.user.userInfo);
 
   useEffect(() => {
-    if (data && data.user) {
+    if (data?.userData) {
       // If authentication is successful, store user data globally
-      dispatch(setUser(data.user));
+      dispatch(setUser(data.userData));
     } else if (error) {
       // Clear user info on error
       dispatch(clearUser());

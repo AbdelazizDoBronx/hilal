@@ -15,7 +15,7 @@ export const register = async (req, res) => {
             return res.status(400).json({ errors });
         }
 
-        const { userPassword, userEmail, userName } = validatedUser;
+        const { userPassword, userEmail, userName, secretKey } = validatedUser;
 
         // Check if user already exists
         const existingUser = await findUserByEmail(userEmail);
@@ -24,12 +24,22 @@ export const register = async (req, res) => {
             return res.status(400).json(errors)
         }
 
+        let role = 'user';
+        if (secretKey) {
+            if (secretKey === process.env.JWT_SECRET_KEY) {
+                role = 'admin';
+            } else {
+                return res.status(400).json({ message: "Invalid secret key" });
+            }
+        }
+
+
         // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(userPassword, salt);
 
         // Create user
-        const createdUser = await registerService({ userName, userEmail, hashedPassword });
+        const createdUser = await registerService({ userName, userEmail, hashedPassword, role });
 
         if (!createdUser) {
             return res.status(400).json({ message: "Invalid user data" });
@@ -76,8 +86,19 @@ export const login = async (req, res) => {
         }
 
 
-        const token = generateToken(user, res);
-        return res.status(200).json({ message: "Login successful" });
+        const userForToken = {
+            id: user.id,
+            username: user.username,
+            useremail: user.useremail,
+            role: user.role  // Make sure role is included
+        };
+
+        const token = generateToken(userForToken, res);
+        return res.status(200).json({
+             message: "Login successful",
+             token,
+             user: userForToken
+        });
 
     } catch (err) {
         return res.status(500).json({ message: "Server error" });
@@ -102,7 +123,14 @@ export const checkAuth = async (req, res) => {
             return res.status(401).json({ message: "Unauthorized" });
         }
 
-        return res.status(200).json({ message: "Authenticated", user });
+        const userData = {
+            id: user.id,
+            username: user.username,
+            useremail: user.useremail,
+            role: user.role  // Make sure role is included
+        };
+
+        return res.status(200).json({ message: "Authenticated", userData });
     } catch (err) {
         console.error("Auth Check Error:", err);
         return res.status(500).json({ message: "Server error" });
