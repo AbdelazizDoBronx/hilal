@@ -8,8 +8,16 @@ const menuItems = [
   { icon: ShoppingCart, label: 'Commandes', path: '/dashboard/orders' },
 ];
 
-const MiniSidebar = ({ isVisible }) => {
+const userMenuItems = [
+    { icon: Home, label: 'Dashboard', path: '/dashboard' },
+    { icon: Package, label: 'Produits', path: '/dashboard/products' },
+    { icon: ShoppingCart, label: 'Mon Panier', path: '/dashboard/cart' },
+  ];
+
+const MiniSidebar = ({ isVisible, role }) => {
   const location = useLocation();
+
+  const items = role === 'admin' ? menuItems : userMenuItems;
 
   return (
     <AnimatePresence>
@@ -18,10 +26,11 @@ const MiniSidebar = ({ isVisible }) => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.3 }}
           className="fixed left-0 top-1/2 transform -translate-y-1/2 bg-white/80 backdrop-blur-sm p-2 rounded-r-xl shadow-lg border border-gray-100/80 z-20"
         >
           <div className="flex flex-col gap-3">
-            {menuItems.map((item) => {
+            {items.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
               
@@ -30,6 +39,7 @@ const MiniSidebar = ({ isVisible }) => {
                   key={item.path}
                   whileHover={{ scale: 1.1, x: 5 }}
                   whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
                 >
                   <Link
                     to={item.path}
@@ -60,3 +70,8 @@ const MiniSidebar = ({ isVisible }) => {
 };
 
 export default MiniSidebar;
+
+
+
+
+

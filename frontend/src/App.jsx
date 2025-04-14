@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
+import Cart from './pages/Cart';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -57,6 +58,19 @@ const App = () => {
             <Layout>
               <Products />
             </Layout>
+          ) : (
+            <Navigate to="/login" />
+          )
+        } />
+        <Route path="/dashboard/cart" element={
+          user ? (
+            user.role === 'admin' ? (
+              <Navigate to="/dashboard" />
+            ) : (
+              <Layout>
+                <Cart />
+              </Layout>
+            )
           ) : (
             <Navigate to="/login" />
           )

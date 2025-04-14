@@ -13,12 +13,18 @@ const menuItems = [
   { icon: Package, label: 'Produits', path: '/dashboard/products' },
   { icon: ShoppingCart, label: 'Commandes', path: '/dashboard/orders' },
 ];
+const userMenuItems = [
+  { icon: Home, label: 'Dashboard', path: '/dashboard' },
+  { icon: Package, label: 'Produits', path: '/dashboard/products' },
+  { icon: ShoppingCart, label: 'Mon Panier', path: '/dashboard/cart' },
+];
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [logout, { isLoading }] = useLogoutMutation();
   const user = useSelector((state) => state.user.userInfo);
+  const items = user?.role === 'admin' ? menuItems : userMenuItems;
 
   const handleLogout = async () => {
     try {
@@ -39,7 +45,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
       <div className="h-full flex flex-col relative">
         <BackgroundParticles />
 
-        <motion.div 
+        <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className="p-6 border-b border-gray-100 flex items-center justify-between relative z-10"
@@ -56,7 +62,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         </motion.div>
 
         <nav className="flex-1 overflow-y-auto p-4 relative z-10">
-          <motion.ul 
+          <motion.ul
             initial="hidden"
             animate="visible"
             variants={{
@@ -65,17 +71,21 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
             }}
             className="space-y-2"
           >
-            {menuItems.map((item) => (
-              <motion.li 
+            {items.map((item) => (
+              <motion.li
                 key={item.path}
                 variants={{
                   hidden: { y: 20, opacity: 0 },
                   visible: { y: 0, opacity: 1, transition: { duration: 0.4 } }
                 }}
               >
-                <NavigationItem 
-                  {...item}
+                <NavigationItem
+                  key={item.path}
+                  icon={item.icon}
+                  label={item.label}
+                  path={item.path}
                   isActive={location.pathname === item.path}
+                  onClick={() => navigate(item.path)}
                 />
               </motion.li>
             ))}
@@ -83,7 +93,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         </nav>
 
         <div className="border-t border-gray-100 p-4 mt-auto relative z-10">
-          <UserProfileCard 
+          <UserProfileCard
             user={user}
             onLogout={handleLogout}
             isLoading={isLoading}
@@ -93,3 +103,4 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
     </motion.aside>
   );
 }
+

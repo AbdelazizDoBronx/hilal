@@ -1,7 +1,13 @@
 import { Edit, Trash2, ShoppingCart, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAddToCartMutation, useGetCartQuery, useUpdateCartItemMutation } from '../../features/cart/cartSlice';
+
 
 const ProductCard = ({ product, onEdit, onDelete, isAdmin }) => {
+  const [addToCart] = useAddToCartMutation();
+  const { data: cartItems = [] } = useGetCartQuery();
+  const [updateCartItem] = useUpdateCartItemMutation();
+
   // Convert price to number and handle potential invalid values
   const formatPrice = (price) => {
     const numPrice = Number(price);
@@ -10,6 +16,30 @@ const ProductCard = ({ product, onEdit, onDelete, isAdmin }) => {
 
   const isLowStock = Number(product.quantity) < 10;
 
+
+  const handleAddToCart = async () => {
+    try {
+      // Check if product already exists in cart
+      const existingCartItem = cartItems.find(item => item.product_id === product.id);
+      
+      if (existingCartItem) {
+        // If exists, increment quantity
+        await updateCartItem({
+          cartItemId: existingCartItem.cart_item_id,
+          quantity: existingCartItem.quantity + 1
+        }).unwrap();
+      } else {
+        // If doesn't exist, add new cart item
+        await addToCart({
+          productId: product.id,
+          quantity: 1,
+          cart_item_id: `${product.id}_${Date.now()}`
+        }).unwrap();
+      }
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+    }
+  };
   return (
     <motion.div 
       whileHover={{ y: -4 }}
@@ -68,14 +98,17 @@ const ProductCard = ({ product, onEdit, onDelete, isAdmin }) => {
             </div>
           </div>
           
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="flex items-center py-2 px-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-500 hover:to-purple-500 transition-all duration-300 shadow-md shadow-indigo-600/10 font-medium text-sm"
-          >
-            <ShoppingCart size={16} className="mr-2" />
-            Ajouter
-          </motion.button>
+          {!isAdmin && (
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="flex items-center py-2 px-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-500 hover:to-purple-500 transition-all duration-300 shadow-md shadow-indigo-600/10 font-medium text-sm"
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart size={16} className="mr-2" />
+              Ajouter
+            </motion.button>
+          )}
         </div>
       </div>
     </motion.div>

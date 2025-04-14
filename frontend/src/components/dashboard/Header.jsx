@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Menu, Bell, Search, User, LogOut } from 'lucide-react';
+import { Menu, Bell, Search, User, LogOut, ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLogoutMutation } from '../../features/auth/authSlice';
 import { useSelector } from 'react-redux';
 import Logo from '../ui/Logo';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useGetCartQuery } from '../../features/cart/cartSlice';
 
 export default function Header({ toggleSidebar, isSidebarOpen }) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -12,8 +13,9 @@ export default function Header({ toggleSidebar, isSidebarOpen }) {
   const navigate = useNavigate();
   const [logout, { isLoading }] = useLogoutMutation();
   const user = useSelector((state) => state.user.userInfo);
-
-  const handleLogout = async () => {
+  const { data: cartItems = [] } = useGetCartQuery();
+  
+  const cartItemCount = cartItems?.length || 0;  const handleLogout = async () => {
     try {
       await logout().unwrap();
       navigate('/login');
@@ -72,6 +74,22 @@ export default function Header({ toggleSidebar, isSidebarOpen }) {
         </div>
 
         <div className="flex items-center gap-x-4">
+          {/* Cart Icon with Counter */}
+          <button
+            onClick={() => navigate('/dashboard/cart')}
+            className="p-2 rounded-lg hover:bg-indigo-50 transition-colors duration-300 relative"
+          >
+            <ShoppingCart size={20} className="text-indigo-600" />
+            {cartItemCount > 0 && (
+              <motion.span 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-full"
+              >
+                {cartItemCount}
+              </motion.span>
+            )}
+          </button>
           {/* Notifications */}
           <div className="relative">
             <button
