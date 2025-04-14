@@ -8,7 +8,8 @@ const validator = (schema) => (payload) =>
 const registerSchema = Joi.object({
     userName:Joi.string().min(3).max(50).required(),
     userEmail:Joi.string().email().required(),
-    userPassword:Joi.string().min(8).max(50).required()
+    userPassword:Joi.string().min(8).max(50).required(),
+    secretKey: Joi.string().allow('').optional()
 })
 
 export const loginSchema = Joi.object({

@@ -8,4 +8,22 @@
   .input-search {
     @apply block w-full rounded-md border border-neutral-300 focus:border-brand-500 focus:ring-brand-500 sm:text-sm text-black bg-white;
   }
+  .input-search-dash {
+    @apply block w-full p-1 rounded-lg border border-neutral-300 focus:border-brand-500 focus:ring-brand-500 sm:text-lg text-gray-900 bg-white;
+  }
+  .dropdown-animation {
+    animation: dropdownSlide 0.2s ease-out;
+    transform-origin: top right;
+  }
 }
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+

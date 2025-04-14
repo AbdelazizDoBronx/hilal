@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import authRoutes from './routes/auth.route.js'
 import productsRoutes from './routes/product.route.js'
 import ordersRoutes from './routes/order.route.js'
+import cartRoutes from './routes/cart.route.js';
 
 // Express server initialisation
 const app = express();
@@ -31,10 +32,11 @@ app.use('/api',authRoutes);
 app.use('/api',productsRoutes);
 // Orders routes
 app.use('/api',ordersRoutes);
+// Cart routes
+app.use('/api', cartRoutes);
 
 
-
-const PORT = process.env.PORT;
+const PORT = process.env.PORT ;
 app.listen(PORT,()=>{
     console.log('server is up and runing on port: ',PORT);
 })

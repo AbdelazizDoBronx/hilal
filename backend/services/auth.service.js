@@ -1,8 +1,8 @@
 import { query } from "../config/db.js"
 
 export const registerService = async (userInfo) => {
-    const {userName,userEmail,hashedPassword} = userInfo;
-        const {rows} = await query('INSERT INTO users(userName,userEmail,userPassword) VALUES ($1,$2,$3) RETURNING  *',[userName,userEmail,hashedPassword]);
+    const {userName,userEmail,hashedPassword, role} = userInfo;
+        const {rows} = await query('INSERT INTO users(userName,userEmail,userPassword,role) VALUES ($1,$2,$3,$4) RETURNING  *',[userName,userEmail,hashedPassword,role]);
         return rows[0];
 }
 
