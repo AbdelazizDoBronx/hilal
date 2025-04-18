@@ -29,7 +29,16 @@ export const updateProductService = async (productDetails,prodcutId) => {
     return rows[0];
 }
 
-export const deleteProductService = async (prodcutId) => {
-    const {rowCount} = await query('DELETE FROM PRODUCTS WHERE id=$1',[prodcutId]);
-    return rowCount>0
-}   
+export const deleteProductService = async (productId) => {
+    try {
+        // First delete related cart items
+        await query('DELETE FROM cart_items WHERE product_id=$1', [productId]);
+        
+        // Then delete the product
+        const {rowCount} = await query('DELETE FROM PRODUCTS WHERE id=$1', [productId]);
+        return rowCount > 0;
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        throw error;
+    }
+}

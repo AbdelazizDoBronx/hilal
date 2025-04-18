@@ -8,8 +8,10 @@ import Layout from './components/dashboard/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Profile from './components/dashboard/Profile';
 import Products from './pages/Products';
 import Cart from './pages/Cart';
+
 
 const App = () => {
   const dispatch = useDispatch();
@@ -53,6 +55,16 @@ const App = () => {
             <Navigate to="/login" />
           )
         } />
+        <Route path="/dashboard/profile" element={
+          user ? (
+            <Layout>
+              <Profile />
+            </Layout>
+          ) : (
+            <Navigate to="/login" />
+          )
+        } />
+
         <Route path="/dashboard/products" element={
           user ? (
             <Layout>

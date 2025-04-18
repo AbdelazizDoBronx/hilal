@@ -58,6 +58,22 @@ export const authApiSlice = apiSlice.injectEndpoints({
       // Skip the query if there's no token
       skip: () => !localStorage.getItem('token'),
     }),
+    updateProfile: builder.mutation({
+      query: (userData) => ({
+        url: 'update-profile',
+        method: 'PUT',
+        body: userData,
+        credentials: 'include',
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setUser(data.user));
+        } catch (error) {
+          console.error('Profile update failed:', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -66,4 +82,5 @@ export const {
   useRegisterMutation,
   useLogoutMutation,
   useCheckAuthQuery,
+  useUpdateProfileMutation
 } = authApiSlice;

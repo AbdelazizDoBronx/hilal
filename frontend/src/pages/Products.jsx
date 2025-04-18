@@ -26,20 +26,24 @@ const Products = () => {
   const user = useSelector((state) => state.user.userInfo);
   const isAdmin = user && user.role === 'admin';
 
-  const handleDeleteProduct = async (id) => {
+const handleDeleteProduct = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      try {
-        await deleteProduct(id).unwrap();
-      } catch (error) {
-        console.error('Failed to delete product:', error);
-        if (error.status === 401) {
-          console.error('Unauthorized - Please login again');
-        } else if (error.status === 403) {
-          console.error('Forbidden - Admin access required');
+        try {
+            await deleteProduct(id).unwrap();
+        } catch (error) {
+            console.error('Failed to delete product:', error);
+            if (error.status === 401) {
+                alert('Unauthorized - Please login again');
+            } else if (error.status === 403) {
+                alert('Forbidden - Admin access required');
+            } else if (error.status === 404) {
+                alert('Product not found');
+            } else {
+                alert('Failed to delete product. Please try again later.');
+            }
         }
-      }
     }
-  };
+};
   
   const handleUpdateProduct = async (productData) => {
     try {

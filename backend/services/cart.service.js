@@ -11,9 +11,10 @@ export const addToCartService = async (cartItem) => {
 
 export const getCartItemsService = async (userId) => {
     const { rows } = await query(`
-        SELECT ci.*, p.name, p.price 
+        SELECT ci.*, p.name, p.price, u.username as added_by
         FROM cart_items ci 
         JOIN products p ON ci.product_id = p.id 
+        JOIN users u ON ci.user_id = u.id 
         WHERE ci.user_id = $1
     `, [userId]);
     return rows;

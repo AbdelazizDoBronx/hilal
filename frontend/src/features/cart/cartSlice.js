@@ -8,6 +8,8 @@ export const cartApiSlice = apiSlice.injectEndpoints({
         method: 'GET',
       }),
       providesTags: ['Cart'],
+      //polling for real-time updates
+      pollingInterval: 3000,
     }),
     addToCart: builder.mutation({
       query: (data) => ({

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Plus, Minus } from 'lucide-react';
+import { Trash2, Plus, Minus, User } from 'lucide-react';
 import { useState } from 'react';
 import Card  from '../ui/Card';
 import  Button  from '../ui/Button';
@@ -58,6 +58,11 @@ const CartItemList = ({ items, onUpdateQuantity, onRemoveItem }) => {
                 <h4 className="font-medium text-gray-900">{item.name}</h4>
                 <div className="text-sm text-gray-500 mt-1">
                   Prix unitaire: {formatPrice(item.price)} MAD
+                </div>
+                
+                <div className="flex items-center text-sm text-gray-500 mt-1">
+                  <User size={14} className="mr-1" />
+                  <span>Ajouté par: {item.added_by}</span>
                 </div>
 
                 <div className="flex items-center mt-3">

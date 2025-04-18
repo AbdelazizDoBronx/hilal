@@ -1,5 +1,5 @@
 import express from 'express'
-import { checkAuth, login, logout, register } from '../controllers/auth.controller.js';
+import { checkAuth, login, logout, register, updateProfile } from '../controllers/auth.controller.js';
 import { authMiddleware, adminMiddleware } from '../middlewares/auth.middleware.js';
 
 // Routes
@@ -18,7 +18,10 @@ router.post('/logout',logout)
 // check is user authenticeated
 router.get('/check-auth',authMiddleware,checkAuth)
 
-// Admin only routes
+// update user profile
+router.put('/update-profile', authMiddleware, updateProfile);
+
+// Admin  routes
 router.get('/admin-only', authMiddleware, adminMiddleware, (req, res) => {
     res.json({ message: "Admin access granted" });
 });
