@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Home, Package, ShoppingCart, ChevronLeft } from 'lucide-react';
+import { Home, Package, ShoppingCart, ClipboardList, ChevronLeft } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useLogoutMutation } from '../../features/auth/authSlice';
@@ -11,12 +11,13 @@ import BackgroundParticles from '../ui/BackgroundParticles';
 const menuItems = [
   { icon: Home, label: 'Dashboard', path: '/dashboard' },
   { icon: Package, label: 'Produits', path: '/dashboard/products' },
-  { icon: ShoppingCart, label: 'Commandes', path: '/dashboard/orders' },
+  { icon: ClipboardList, label: 'Commandes', path: '/dashboard/orders' },
 ];
 const userMenuItems = [
   { icon: Home, label: 'Dashboard', path: '/dashboard' },
   { icon: Package, label: 'Produits', path: '/dashboard/products' },
   { icon: ShoppingCart, label: 'Mon Panier', path: '/dashboard/cart' },
+  { icon: ClipboardList, label: 'Mes Commandes', path: '/dashboard/orders' },
 ];
 
 export default function Sidebar({ isOpen, toggleSidebar }) {

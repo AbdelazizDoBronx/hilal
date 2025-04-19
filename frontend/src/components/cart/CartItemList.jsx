@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Plus, Minus, User } from 'lucide-react';
+import { Trash2, Plus, Minus, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
-import Card  from '../ui/Card';
-import  Button  from '../ui/Button';
+import Card from '../ui/Card';
+import Button from '../ui/Button';
+import { toast } from 'react-hot-toast';
 
 const formatPrice = (price) => {
   const numPrice = Number(price);
@@ -13,27 +14,24 @@ const CartItemList = ({ items, onUpdateQuantity, onRemoveItem }) => {
   const [editingQuantity, setEditingQuantity] = useState(null);
   const [inputValue, setInputValue] = useState('');
 
-  const handleQuantityClick = (item) => {
-    setEditingQuantity(item.cart_item_id);
-    setInputValue(item.quantity.toString());
-  };
-
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    if (value === '' || /^[0-9\b]+$/.test(value)) {
-      setInputValue(value);
+  const handleQuantityChange = async (cartItemId, newQuantity, stockQuantity) => {
+    if (newQuantity > stockQuantity) {
+      toast.error('Stock insuffisant');
+      return false;
     }
+    await onUpdateQuantity(cartItemId, newQuantity);
+    return true;
   };
 
-  const handleInputBlur = (cartItemId) => {
+  const handleInputBlur = async (cartItemId, stockQuantity) => {
     if (inputValue !== '' && inputValue !== '0') {
-      onUpdateQuantity(cartItemId, parseInt(inputValue, 10));
+      const quantity = parseInt(inputValue, 10);
+      const success = await handleQuantityChange(cartItemId, quantity, stockQuantity);
+      if (!success) {
+        setInputValue(stockQuantity.toString());
+      }
     }
     setEditingQuantity(null);
-  };
-
-  const handleInputKeyDown = (e, cartItemId) => {
-    if (e.key === 'Enter') handleInputBlur(cartItemId);
   };
 
   return (
@@ -59,44 +57,68 @@ const CartItemList = ({ items, onUpdateQuantity, onRemoveItem }) => {
                 <div className="text-sm text-gray-500 mt-1">
                   Prix unitaire: {formatPrice(item.price)} MAD
                 </div>
-                
-                <div className="flex items-center text-sm text-gray-500 mt-1">
-                  <User size={14} className="mr-1" />
-                  <span>Ajouté par: {item.added_by}</span>
+
+                {/* Stock Status */}
+                <div className="text-sm mt-1">
+                  {item.quantity > item.stock_quantity && (
+                    <div className="flex items-center text-red-500">
+                      <AlertCircle size={14} className="mr-1" />
+                      <span>Stock insuffisant (Disponible: {item.stock_quantity})</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center mt-3">
-                  <Button 
-                    variant="secondary" 
-                    size="sm" 
-                    onClick={() => onUpdateQuantity(item.cart_item_id, Math.max(0, item.quantity - 1))}
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleQuantityChange(
+                      item.cart_item_id,
+                      Math.max(0, item.quantity - 1),
+                      item.stock_quantity
+                    )}
                     icon={Minus}
+                    disabled={item.quantity > item.stock_quantity}
                   />
-                  
+
                   {editingQuantity === item.cart_item_id ? (
                     <input
-                      type="text"
+                      type="number"
+                      min="1"
+                      max={item.stock_quantity}
                       value={inputValue}
-                      onChange={handleInputChange}
-                      onBlur={() => handleInputBlur(item.cart_item_id)}
-                      onKeyDown={(e) => handleInputKeyDown(e, item.cart_item_id)}
-                      className="w-12 mx-2 text-center border border-gray-300 rounded-md py-1 px-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onBlur={() => handleInputBlur(item.cart_item_id, item.stock_quantity)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.target.blur();
+                        }
+                      }}
+                      className="w-16 text-center border border-gray-200 rounded-lg py-1 px-2"
                       autoFocus
                     />
                   ) : (
-                    <span 
-                      onClick={() => handleQuantityClick(item)}
-                      className="mx-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded-md"
+                    <span
+                      className="w-16 text-center cursor-pointer hover:bg-gray-100 py-1 px-2 rounded-lg"
+                      onClick={() => {
+                        setEditingQuantity(item.cart_item_id);
+                        setInputValue(item.quantity.toString());
+                      }}
                     >
                       {item.quantity}
                     </span>
                   )}
 
-                  <Button 
-                    variant="secondary" 
-                    size="sm" 
-                    onClick={() => onUpdateQuantity(item.cart_item_id, item.quantity + 1)} 
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleQuantityChange(
+                      item.cart_item_id,
+                      item.quantity + 1,
+                      item.stock_quantity
+                    )}
                     icon={Plus}
+                    disabled={item.quantity >= item.stock_quantity}
                   />
                 </div>
               </div>
@@ -105,9 +127,9 @@ const CartItemList = ({ items, onUpdateQuantity, onRemoveItem }) => {
                 <div className="text-lg font-bold text-gray-900">
                   {formatPrice(item.price * item.quantity)} MAD
                 </div>
-                <Button 
-                  variant="danger" 
-                  size="sm" 
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={() => onRemoveItem(item.cart_item_id)}
                   icon={Trash2}
                   className="mt-2"

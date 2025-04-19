@@ -11,7 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Profile from './components/dashboard/Profile';
 import Products from './pages/Products';
 import Cart from './pages/Cart';
-
+import Orders from './pages/Orders';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -83,6 +83,16 @@ const App = () => {
                 <Cart />
               </Layout>
             )
+          ) : (
+            <Navigate to="/login" />
+          )
+        } />
+        <Route path="/dashboard/orders" element={
+          user ? (
+              <Layout>
+                <Orders />
+              </Layout>
+            
           ) : (
             <Navigate to="/login" />
           )
