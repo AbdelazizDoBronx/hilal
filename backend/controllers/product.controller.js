@@ -68,7 +68,7 @@ export const updateProduct = async (req,res) => {
     try {   
         const {id} = req.params;
         const errors = {};
-        const {error,value:validatedProduct} = productInfoValidator(req.body);
+        const {error, value:validatedProduct} = productInfoValidator(req.body);
         
         if (error) {
             error.details.forEach(err => {
@@ -77,19 +77,19 @@ export const updateProduct = async (req,res) => {
             return res.status(400).json({ errors });
         }
 
-        const updatedProduct = await updateProductService(validatedProduct,id);
-        if(updatedProduct){
-            res.status(200).json({message: "product updated successfuly!"})
-        }else{
-            res.status(400).json({message: "invalid product data"})
+        const updatedProduct = await updateProductService(validatedProduct, id);
+        if(updatedProduct) {
+            res.status(200).json({message: "product updated successfully!"});
+        } else {
+            res.status(400).json({message: "Product name already exists!"});
         }
     } catch (error) {
         res.status(500).json({
             message: "internal server error",
             error
-        })
+        });
     }
-}
+};
 
 
 export const deleteProduct = async (req,res) => {

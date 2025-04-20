@@ -13,7 +13,9 @@ export default function Header({ toggleSidebar, isSidebarOpen }) {
   const navigate = useNavigate();
   const [logout, { isLoading }] = useLogoutMutation();
   const user = useSelector((state) => state.user.userInfo);
-  const { data: cartItems = [] } = useGetCartQuery();
+  const { data: cartItems = [] } = useGetCartQuery(undefined, {
+    skip: user?.role === 'admin' 
+  });
   
   const cartItemCount = cartItems?.length || 0;  const handleLogout = async () => {
     try {
@@ -75,6 +77,7 @@ export default function Header({ toggleSidebar, isSidebarOpen }) {
 
         <div className="flex items-center gap-x-4">
           {/* Cart Icon with Counter */}
+          {user?.role !== 'admin' && (
           <button
             onClick={() => navigate('/dashboard/cart')}
             className="p-2 rounded-lg hover:bg-indigo-50 transition-colors duration-300 relative"
@@ -90,6 +93,7 @@ export default function Header({ toggleSidebar, isSidebarOpen }) {
               </motion.span>
             )}
           </button>
+          )}
           {/* Notifications */}
           <div className="relative">
             <button
