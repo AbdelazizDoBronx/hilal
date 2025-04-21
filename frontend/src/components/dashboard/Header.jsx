@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Menu, Bell, Search, User, LogOut, ShoppingCart } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useLogoutMutation } from '../../features/auth/authSlice';
 import { useSelector } from 'react-redux';
 import Logo from '../ui/Logo';
@@ -14,10 +14,10 @@ export default function Header({ toggleSidebar, isSidebarOpen }) {
   const [logout, { isLoading }] = useLogoutMutation();
   const user = useSelector((state) => state.user.userInfo);
   const { data: cartItems = [] } = useGetCartQuery(undefined, {
-    skip: user?.role === 'admin' 
+    skip: user?.role === 'admin'
   });
-  
-  const cartItemCount = cartItems?.length || 0;  const handleLogout = async () => {
+
+  const cartItemCount = cartItems?.length || 0; const handleLogout = async () => {
     try {
       await logout().unwrap();
       navigate('/login');
@@ -30,10 +30,10 @@ export default function Header({ toggleSidebar, isSidebarOpen }) {
     <header className="bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm">
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-x-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ 
-              opacity: isSidebarOpen ? 0 : 1, 
+            animate={{
+              opacity: isSidebarOpen ? 0 : 1,
               scale: isSidebarOpen ? 0.9 : 1,
               width: isSidebarOpen ? 0 : 'auto'
             }}
@@ -47,18 +47,20 @@ export default function Header({ toggleSidebar, isSidebarOpen }) {
               <Menu size={20} />
             </button>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             initial={{ opacity: 0, x: -20 }}
-            animate={{ 
-              opacity: isSidebarOpen ? 0 : 1, 
+            animate={{
+              opacity: isSidebarOpen ? 0 : 1,
               x: isSidebarOpen ? -20 : 0,
               width: isSidebarOpen ? 0 : 'auto'
             }}
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-100 flex items-center justify-between ">
+            <div
+              onClick={() => navigate('/dashboard')}
+              className="p-4 border-b border-gray-100 flex items-center justify-between ">
               <Logo variant="full_logo" size="md" className="h-8" />
             </div>
           </motion.div>
@@ -78,21 +80,21 @@ export default function Header({ toggleSidebar, isSidebarOpen }) {
         <div className="flex items-center gap-x-4">
           {/* Cart Icon with Counter */}
           {user?.role !== 'admin' && (
-          <button
-            onClick={() => navigate('/dashboard/cart')}
-            className="p-2 rounded-lg hover:bg-indigo-50 transition-colors duration-300 relative"
-          >
-            <ShoppingCart size={20} className="text-indigo-600" />
-            {cartItemCount > 0 && (
-              <motion.span 
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-full"
-              >
-                {cartItemCount}
-              </motion.span>
-            )}
-          </button>
+            <button
+              onClick={() => navigate('/dashboard/cart')}
+              className="p-2 rounded-lg hover:bg-indigo-50 transition-colors duration-300 relative"
+            >
+              <ShoppingCart size={20} className="text-indigo-600" />
+              {cartItemCount > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-full"
+                >
+                  {cartItemCount}
+                </motion.span>
+              )}
+            </button>
           )}
           {/* Notifications */}
           <div className="relative">
@@ -103,10 +105,10 @@ export default function Header({ toggleSidebar, isSidebarOpen }) {
               <Bell size={20} className="text-indigo-600" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
-            
+
             <AnimatePresence>
               {isNotificationsOpen && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -138,13 +140,23 @@ export default function Header({ toggleSidebar, isSidebarOpen }) {
 
             <AnimatePresence>
               {isProfileOpen && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                   className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 overflow-hidden"
                 >
+                  <Link
+                    to="/dashboard/profile"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Profile
+                    </div>
+                  </Link>
                   <button
                     onClick={handleLogout}
                     disabled={isLoading}

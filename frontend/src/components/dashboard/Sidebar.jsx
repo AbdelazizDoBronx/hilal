@@ -51,7 +51,9 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
           animate={{ y: 0, opacity: 1 }}
           className="p-6 border-b border-gray-100 flex items-center justify-between relative z-10"
         >
-          <div className="group">
+          <div
+            onClick={() => navigate('/dashboard')}
+            className="group">
             <Logo variant="full_logo" size="md" className="h-8 relative transition-transform duration-300 group-hover:scale-105" />
           </div>
           <button

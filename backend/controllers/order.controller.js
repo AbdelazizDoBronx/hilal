@@ -1,6 +1,7 @@
 import { 
     createOrderService, 
-    getOrdersService
+    getOrdersService,
+    deleteOrderService
 } from "../services/order.service.js";
 
 export const createOrder = async (req, res) => {
@@ -42,3 +43,21 @@ export const getOrders = async (req, res) => {
     }
 };
 
+export const deleteOrder = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const deleted = await deleteOrderService(orderId);
+        
+        if (deleted) {
+            res.status(200).json({ message: "Order deleted successfully" });
+        } else {
+            res.status(404).json({ message: "Order not found" });
+        }
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        res.status(500).json({ 
+            message: "Failed to delete order",
+            error: error.message 
+        });
+    }
+};

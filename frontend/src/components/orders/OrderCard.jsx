@@ -1,11 +1,16 @@
 import { motion } from 'framer-motion';
-import { Package, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
+import { Package, ChevronDown, ChevronUp, Calendar, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
+import { useSelector } from 'react-redux';
 
-const OrderCard = ({ order }) => {
+
+const OrderCard = ({ order, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const user = useSelector((state) => state.user.userInfo);
+  const isAdmin = user?.role === 'admin';
+
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -65,6 +70,17 @@ const OrderCard = ({ order }) => {
               <p className="text-sm text-slate-500 mt-1">
                 Par {order.username}
               </p>
+              {isAdmin && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  icon={Trash2}
+                  onClick={() => onDelete(order.order_id)}
+                  className="mt-2"
+                >
+                  Supprimer
+                </Button>
+              )}
             </div>
           </div>
 

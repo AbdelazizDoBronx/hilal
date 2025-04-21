@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useGetOrdersQuery } from '../features/orders/orderSlice';
+import { useGetOrdersQuery, useDeleteOrderMutation } from '../features/orders/orderSlice';
 import OrderCard from '../components/orders/OrderCard';
 import OrdersFilter from '../components/orders/OrdersFilter';
 import { ShoppingBag, FileText } from 'lucide-react';
@@ -8,12 +8,26 @@ import BackgroundParticles from '../components/ui/BackgroundParticles';
 import GlassCard from '../components/ui/GlassCard';
 import Button from '../components/ui/Button';
 import Pagination from '../components/ui/Pagination';
+import { toast } from 'react-toastify';
 
 const Orders = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
     const [dateFilter, setDateFilter] = useState('');
     const { data: orders = [], isLoading } = useGetOrdersQuery(dateFilter);
+    const [deleteOrder] = useDeleteOrderMutation();
+
+    const handleDeleteOrder = async (orderId) => {
+      try {
+        if (window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
+          await deleteOrder(orderId).unwrap();
+          toast.success('Commande supprimée avec succès');
+        }
+      } catch (error) {
+        toast.error('Erreur lors de la suppression de la commande');
+        console.error('Error deleting order:', error);
+      }
+    };
 
     const paginatedOrders = orders.slice(
         (currentPage - 1) * itemsPerPage,
@@ -117,6 +131,7 @@ const Orders = () => {
                                 <OrderCard
                                     key={order.order_id}
                                     order={order}
+                                    onDelete={handleDeleteOrder}
                                 />
                             ))}
                             <Pagination

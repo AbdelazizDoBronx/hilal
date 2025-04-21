@@ -18,10 +18,18 @@ export const orderApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ['Orders', 'Cart', 'Products'],
     }),
   
+    deleteOrder: builder.mutation({
+      query: (orderId) => ({
+        url: `/orders/${orderId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Orders'],
+    }),
   }),
 });
 
 export const {
   useGetOrdersQuery,
   useCreateOrderMutation,
+  useDeleteOrderMutation,
 } = orderApiSlice;

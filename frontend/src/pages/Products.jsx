@@ -80,13 +80,21 @@ const handleSubmit = async (productData) => {
   };
 
   const handleDelete = async (productId) => {
-    try {
-      await deleteProduct(productId).unwrap();
-      toast.success('Product deleted successfully');
-    } catch (error) {
-      toast.error(error.data?.message || 'An error occurred');
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      try {
+        const result = await deleteProduct(productId).unwrap();
+        if (result) {
+          toast.success('Product deleted successfully');
+        } else {
+          toast.error('Failed to delete product');
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        toast.error(error.data?.message || 'Failed to delete product');
+      }
     }
-  };
+  }
+
 
   return (
     <ProductLayout
