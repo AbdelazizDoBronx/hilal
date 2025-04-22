@@ -25,11 +25,11 @@ const Logo = ({ variant = 'default', size = 'md', className = '' }) => {
   const sizeClass = sizes[size] || sizes.md;
 
   return (
-    <div className={`${className} flex items-center justify-center`}>
+    <div className={`${className} flex items-center justify-center group cursor-pointer`}>
       <img 
         src={selectedLogo || "/placeholder.svg"} 
         alt="AlHilal Distribution" 
-        className={`${sizeClass} w-auto object-contain transition-all duration-300`}
+        className={`${sizeClass} w-auto object-contain transition-all duration-300 group-hover:scale-105`}
       />
     </div>
   );

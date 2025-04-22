@@ -30,7 +30,7 @@ export const addToCart = async (req, res) => {
             });
         }
 
-        // Check if product already exists in user's cart
+        // Check if product already exists in current user's cart
         const existingItem = await query(
             'SELECT * FROM cart_items WHERE user_id = $1 AND product_id = $2',
             [userId, productId]
@@ -60,8 +60,7 @@ export const addToCart = async (req, res) => {
              [result.rows[0].cart_item_id]
         );
 
-        res.status(201).json(cartItem.rows[0]);
-
+        res.status(200).json(cartItem.rows[0]);
     } catch (error) {
         console.error('Error adding to cart:', error);
         res.status(500).json({

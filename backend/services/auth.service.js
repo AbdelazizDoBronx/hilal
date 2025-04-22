@@ -11,3 +11,26 @@ export const findUserByEmail = async (userEmail) => {
     return rows[0];
 }
 
+export const updateProfileService = async (userId, username, useremail) => {
+    // Check if email exists (excluding current user)
+    const checkEmail = await query(
+        'SELECT * FROM users WHERE useremail = $1 AND id != $2',
+        [useremail, userId]
+    );
+
+    if (checkEmail.rows.length > 0) {
+        throw new Error("Email is already in use");
+    }
+
+    // Update user
+    const result = await query(
+        'UPDATE users SET username = $1, useremail = $2 WHERE id = $3 RETURNING id, username, useremail, role',
+        [username, useremail, userId]
+    );
+
+    if (result.rows.length === 0) {
+        throw new Error("User not found");
+    }
+
+    return result.rows[0];
+};

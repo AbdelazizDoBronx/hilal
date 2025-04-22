@@ -1,23 +1,27 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, Link } from 'react-router-dom';
-import { Home, Package, ShoppingCart } from 'lucide-react';
+import { Home, Package, ShoppingCart, ClipboardList } from 'lucide-react';
 
 const menuItems = [
   { icon: Home, label: 'Dashboard', path: '/dashboard' },
   { icon: Package, label: 'Produits', path: '/dashboard/products' },
-  { icon: ShoppingCart, label: 'Commandes', path: '/dashboard/orders' },
+  { icon: ClipboardList, label: 'Commandes', path: '/dashboard/orders' },
 ];
 
 const userMenuItems = [
-    { icon: Home, label: 'Dashboard', path: '/dashboard' },
-    { icon: Package, label: 'Produits', path: '/dashboard/products' },
-    { icon: ShoppingCart, label: 'Mon Panier', path: '/dashboard/cart' },
-  ];
+  { icon: Home, label: 'Dashboard', path: '/dashboard' },
+  { icon: Package, label: 'Produits', path: '/dashboard/products' },
+  { icon: ShoppingCart, label: 'Mon Panier', path: '/dashboard/cart' },
+  { icon: ClipboardList, label: 'Commandes', path: '/dashboard/orders' },
+];
 
 const MiniSidebar = ({ isVisible, role }) => {
   const location = useLocation();
 
-  const items = role === 'admin' ? menuItems : userMenuItems;
+  // Filter out "Mon Panier" for admin role
+  const items = role === 'admin' 
+    ? menuItems 
+    : userMenuItems.filter(item => item.label !== 'Mon Panier');
 
   return (
     <AnimatePresence>
@@ -33,7 +37,7 @@ const MiniSidebar = ({ isVisible, role }) => {
             {items.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
-              
+
               return (
                 <motion.div
                   key={item.path}
@@ -47,13 +51,13 @@ const MiniSidebar = ({ isVisible, role }) => {
                     title={item.label}
                   >
                     <div className={`p-2 rounded-lg transition-all duration-300 ${
-                      isActive 
-                        ? 'bg-indigo-600 text-white' 
+                      isActive
+                        ? 'bg-indigo-600 text-white'
                         : 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-600'
                     }`}>
                       <Icon size={20} />
                     </div>
-                    
+
                     {/* Tooltip */}
                     <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 whitespace-nowrap">
                       {item.label}
@@ -70,8 +74,4 @@ const MiniSidebar = ({ isVisible, role }) => {
 };
 
 export default MiniSidebar;
-
-
-
-
 

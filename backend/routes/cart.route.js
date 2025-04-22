@@ -10,7 +10,6 @@ import {
 
 const router = express.Router();
 
-// All cart routes should be protected
 router.use(authMiddleware);
 
 router.get('/cart', getCartItems);

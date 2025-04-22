@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { findUserByEmail, registerService } from "../services/auth.service.js";
+import { findUserByEmail, registerService, updateProfileService } from "../services/auth.service.js";
 import { loginSchemaValidator, registerSchemaValidator } from "../validator/auth.validator.js";
 import { generateToken } from '../services/tokenGenirator.service.js';
 
@@ -50,6 +50,7 @@ export const register = async (req, res) => {
 
         return res.status(201).json({
             message: "User registered successfully",
+            token,
         });
 
     } catch (err) {
@@ -90,7 +91,7 @@ export const login = async (req, res) => {
             id: user.id,
             username: user.username,
             useremail: user.useremail,
-            role: user.role  // Make sure role is included
+            role: user.role  
         };
 
         const token = generateToken(userForToken, res);
@@ -127,12 +128,46 @@ export const checkAuth = async (req, res) => {
             id: user.id,
             username: user.username,
             useremail: user.useremail,
-            role: user.role  // Make sure role is included
+            role: user.role  
         };
 
         return res.status(200).json({ message: "Authenticated", userData });
     } catch (err) {
         console.error("Auth Check Error:", err);
         return res.status(500).json({ message: "Server error" });
+    }
+}
+
+export const updateProfile = async (req, res) => {
+    try {
+        const { username, useremail } = req.body;
+        const userId = req.user.id;
+
+        // Validate input
+        if (!username || !useremail) {
+            return res.status(400).json({ 
+                message: "Username and email are required" 
+            });
+        }
+
+        // Update profile using service
+        const updatedUser = await updateProfileService(userId, username, useremail);
+
+        res.json({
+            message: "Profile updated successfully",
+            user: {
+                id: updatedUser.id,
+                username: updatedUser.username,
+                useremail: updatedUser.useremail,
+                role: updatedUser.role
+            }
+        });
+
+    } catch (error) {
+        console.error('Profile update error:', error);
+        res.status(500).json({ 
+            message: "Failed to update profile",
+            error: error.message 
+        });
     }
 };

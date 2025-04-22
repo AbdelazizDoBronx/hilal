@@ -1,202 +1,134 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useGetProductsQuery, useAddProductMutation, useUpdateProductMutation, useDeleteProductMutation } from '../features/products/productSlice';
-import ProductCard from '../components/products/ProductCard';
-import ProductForm from '../components/products/ProductForm';
-import ProductsHeader from '../components/products/ProductsHeader';
-import ProductsSearch from '../components/products/ProductsSearch';
-import { ProductsLoading, ProductsEmpty } from '../components/products/ProductsEmptyState';
-import BackgroundParticles from '../components/ui/BackgroundParticles';
 import { useSelector } from 'react-redux';
+import {
+  useGetProductsQuery,
+  useAddProductMutation,
+  useUpdateProductMutation,
+  useDeleteProductMutation
+} from '../features/products/productSlice';
+import { ProductLayout, ProductGrid, ProductActions } from '../components/products';
+import { useProductFilters } from '../hooks/useProductFilters';
+import usePagination from '../hooks/usePagination';
+import { toast } from 'react-toastify';
+
 const Products = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [filters, setFilters] = useState({
-    sortBy: 'name',
+    sortBy: '',
     order: 'asc',
     stock: 'all'
   });
-  const [showForm, setShowForm] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
 
+  // Redux hooks
   const { data: products = [], isLoading } = useGetProductsQuery();
   const [addProduct] = useAddProductMutation();
   const [updateProduct] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
-
+  
+  // User info from Redux store
   const user = useSelector((state) => state.user.userInfo);
-  const isAdmin = user && user.role === 'admin';
+  const isAdmin = user?.role === 'admin';
 
-  const handleDeleteProduct = async (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      try {
-        await deleteProduct(id).unwrap();
-      } catch (error) {
-        console.error('Failed to delete product:', error);
-        if (error.status === 401) {
-          console.error('Unauthorized - Please login again');
-        } else if (error.status === 403) {
-          console.error('Forbidden - Admin access required');
-        }
-      }
-    }
+  const { filteredProducts } = useProductFilters(products, searchTerm, filters);
+  const {
+    currentPage,
+    paginatedItems: paginatedProducts,
+    setCurrentPage
+  } = usePagination(filteredProducts, 9);
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
   };
-  
-  const handleUpdateProduct = async (productData) => {
-    try {
-      await updateProduct({ id: productData.id, ...productData }).unwrap();
-      setShowForm(false);
-      setSelectedProduct(null);
-    } catch (error) {
-      console.error('Failed to update product:', error);
-      if (error.status === 401) {
-        console.error('Unauthorized - Please login again');
-      } else if (error.status === 403) {
-        console.error('Forbidden - Admin access required');
-      }
-    }
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
   };
-  
-  const handleAddProduct = async (productData) => {
-    try {
+
+const handleSubmit = async (productData) => {
+  try {
+    if (selectedProduct) {
+      // Updating existing product
+      const result = await updateProduct({
+        id: selectedProduct.id,
+        ...productData
+      }).unwrap();
+      
+      if (result) {
+        toast.success('Product updated successfully');
+        setShowForm(false);
+        setSelectedProduct(null);
+      }
+    } else {
+      // Adding new product
       await addProduct(productData).unwrap();
+      toast.success('Product added successfully');
       setShowForm(false);
-    } catch (error) {
-      console.error('Failed to add product:', error);
-      if (error.status === 401) {
-        console.error('Unauthorized - Please login again');
-      } else if (error.status === 403) {
-        console.error('Forbidden - Admin access required');
+    }
+  } catch (error) {
+    console.error('Operation failed:', error);
+    toast.error(
+      error.data?.message || 
+      'Failed to update product. Please try again.'
+    );
+  }
+};
+  const handleEdit = (product) => {
+    setSelectedProduct(product);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (productId) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      try {
+        const result = await deleteProduct(productId).unwrap();
+        if (result) {
+          toast.success('Product deleted successfully');
+        } else {
+          toast.error('Failed to delete product');
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        toast.error(error.data?.message || 'Failed to delete product');
       }
     }
-  };
-  
+  }
 
-  const filterProducts = (products) => {
-    let filtered = [...products];
 
-    // Apply search filter
-    if (searchTerm) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Apply stock filter
-    switch (filters.stock) {
-      case 'inStock':
-        filtered = filtered.filter(product => product.quantity > 10);
-        break;
-      case 'lowStock':
-        filtered = filtered.filter(product => product.quantity > 0 && product.quantity <= 10);
-        break;
-      case 'outOfStock':
-        filtered = filtered.filter(product => product.quantity === 0);
-        break;
-      default:
-        break;
-    }
-    // Apply sorting
-    filtered.sort((a, b) => {
-      const aValue = a[filters.sortBy];
-      const bValue = b[filters.sortBy];
-
-      if (typeof aValue === 'string') {
-        return filters.order === 'asc' 
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-
-      return filters.order === 'asc' ? aValue - bValue : bValue - aValue;
-    });
-
-    return filtered;
-  };
-  const filteredProducts = filterProducts(products);
   return (
-    <div className="relative">
-      <BackgroundParticles />
-
-      <div className="relative z-10">
-        <ProductsHeader 
-          onAddClick={() => {
-            setSelectedProduct(null);
-            setShowForm(true);
-          }} 
-          showAddButton={isAdmin}
-        />
-
-        <motion.div 
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-100/80 mb-6 overflow-hidden"
-        >
-          <ProductsSearch 
-            searchTerm={searchTerm}
-            onSearchChange={(e) => setSearchTerm(e.target.value)}
-            filters={filters}
-            onFilterChange={setFilters}
-          />
-
-          <div className="p-6">
-            {isLoading ? (
-              <ProductsLoading />
-            ) : filteredProducts.length === 0 ? (
-              <ProductsEmpty 
-                searchTerm={searchTerm}
-                onAddClick={() => {
-                  setSelectedProduct(null);
-                  setShowForm(true);
-                }}
-              />
-            ) : (
-              <motion.div 
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  visible: { transition: { staggerChildren: 0.05 } },
-                  hidden: {}
-                }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              >
-                {filteredProducts.map((product) => (
-                  <motion.div
-                    key={product.id}
-                    variants={{
-                      hidden: { y: 20, opacity: 0 },
-                      visible: { y: 0, opacity: 1, transition: { duration: 0.4 } }
-                    }}
-                  >
-                    <ProductCard
-                      product={product}
-                      onEdit={isAdmin ? (product) => {
-                        setSelectedProduct(product);
-                        setShowForm(true);
-                      } : null}
-                      onDelete={isAdmin ? handleDeleteProduct : null}
-                      isAdmin={isAdmin}
-                    />
-                  </motion.div>
-                ))}
-              </motion.div>
-            )}
-          </div>
-        </motion.div>
-      </div>
-
-      <AnimatePresence>
-      {isAdmin && showForm && (
-        <ProductForm
-          product={selectedProduct}
-          onSubmit={selectedProduct ? handleUpdateProduct : handleAddProduct}
-          onClose={() => {
-            setShowForm(false);
-            setSelectedProduct(null);
-          }}
-        />
-      )}
-      </AnimatePresence>
-    </div>
+    <ProductLayout
+      isAdmin={isAdmin}
+      searchTerm={searchTerm}
+      filters={filters}
+      onSearch={handleSearch}
+      onFilter={handleFilterChange}
+      onAddClick={() => {
+        setSelectedProduct(null);
+        setShowForm(true);
+      }}
+    >
+      <ProductGrid
+        products={paginatedProducts}
+        isLoading={isLoading}
+        isAdmin={isAdmin}
+        currentPage={currentPage}
+        totalItems={filteredProducts.length}
+        onPageChange={setCurrentPage}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+      <ProductActions
+        showForm={showForm}
+        selectedProduct={selectedProduct}
+        isAdmin={isAdmin}
+        onClose={() => {
+          setShowForm(false);
+          setSelectedProduct(null);
+        }}
+        onSubmit={handleSubmit}
+      />
+    </ProductLayout>
   );
 };
 

@@ -4,9 +4,21 @@ import CartEmpty from '../components/cart/CartEmpty';
 import CartItemList from '../components/cart/CartItemList';
 import CartSummary from '../components/cart/CartSummary';
 import { useGetCartQuery, useUpdateCartItemMutation, useRemoveFromCartMutation, useClearCartMutation } from '../features/cart/cartSlice';
+import { useSelector } from 'react-redux';
 
 const Cart = () => {
-    const { data: cartItems = [], isLoading, error } = useGetCartQuery();  
+    const user = useSelector((state) => state.user.userInfo);
+    const {
+         data: cartItems = [],
+         isLoading, 
+         error
+         } = useGetCartQuery(undefined, {
+            // Only fetch if user is authenticated
+            skip: !user,
+            // Refetch when user changes
+            refetchOnMountOrArgChange: true
+        }
+    );  
     const [updateCartItem] = useUpdateCartItemMutation();
     const [removeFromCart] = useRemoveFromCartMutation();
     const [clearCart] = useClearCartMutation();

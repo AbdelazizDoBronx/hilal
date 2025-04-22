@@ -12,10 +12,10 @@ const UserProfileCard = ({ user, onLogout, isLoading }) => {
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-medium text-gray-900">
-              {user?.userName || 'Utilisateur'}
+              {user.username}
             </span>
             <span className="text-xs text-gray-500">
-              {user?.userEmail || 'user@email.com'}
+              {user.useremail}
             </span>
           </div>
         </div>

@@ -1,10 +1,11 @@
 import { Edit, Trash2, ShoppingCart, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAddToCartMutation, useGetCartQuery, useUpdateCartItemMutation } from '../../features/cart/cartSlice';
+import { useSelector } from 'react-redux';
 
 
 const ProductCard = ({ product, onEdit, onDelete, isAdmin }) => {
-  const [addToCart] = useAddToCartMutation();
+  const currentUserId = useSelector((state) => state.user.userInfo);  const [addToCart] = useAddToCartMutation();
   const { data: cartItems = [] } = useGetCartQuery();
   const [updateCartItem] = useUpdateCartItemMutation();
 
@@ -17,29 +18,32 @@ const ProductCard = ({ product, onEdit, onDelete, isAdmin }) => {
   const isLowStock = Number(product.quantity) < 10;
 
 
-  const handleAddToCart = async () => {
-    try {
-      // Check if product already exists in cart
-      const existingCartItem = cartItems.find(item => item.product_id === product.id);
-      
-      if (existingCartItem) {
-        // If exists, increment quantity
-        await updateCartItem({
-          cartItemId: existingCartItem.cart_item_id,
-          quantity: existingCartItem.quantity + 1
-        }).unwrap();
-      } else {
-        // If doesn't exist, add new cart item
-        await addToCart({
-          productId: product.id,
-          quantity: 1,
-          cart_item_id: `${product.id}_${Date.now()}`
-        }).unwrap();
-      }
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
+const handleAddToCart = async () => {
+  try {
+    // Check if current user already has this product in cart
+    const currentUserCartItem = cartItems.find(item => 
+      item.product_id === product.id && 
+      item.user_id === currentUserId  
+    );
+    
+    if (currentUserCartItem) {
+      // If current user already has this product, update quantity
+      await updateCartItem({
+        cartItemId: currentUserCartItem.cart_item_id,
+        quantity: currentUserCartItem.quantity + 1
+      }).unwrap();
+    } else {
+      // If current user doesn't have this product, add new cart item
+      await addToCart({
+        productId: product.id,
+        quantity: 1,
+        cart_item_id: `${product.id}_${Date.now()}`
+      }).unwrap();
     }
-  };
+  } catch (error) {
+    console.error('Failed to add to cart:', error);
+  }
+};
   return (
     <motion.div 
       whileHover={{ y: -4 }}
@@ -116,3 +120,5 @@ const ProductCard = ({ product, onEdit, onDelete, isAdmin }) => {
 };
 
 export default ProductCard;
+
+

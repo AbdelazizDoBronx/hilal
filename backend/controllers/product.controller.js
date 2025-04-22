@@ -68,7 +68,7 @@ export const updateProduct = async (req,res) => {
     try {   
         const {id} = req.params;
         const errors = {};
-        const {error,value:validatedProduct} = productInfoValidator(req.body);
+        const {error, value:validatedProduct} = productInfoValidator(req.body);
         
         if (error) {
             error.details.forEach(err => {
@@ -77,41 +77,41 @@ export const updateProduct = async (req,res) => {
             return res.status(400).json({ errors });
         }
 
-        const updatedProduct = await updateProductService(validatedProduct,id);
-        if(updatedProduct){
-            res.status(200).json({message: "product updated successfuly!"})
-        }else{
-            res.status(400).json({message: "invalid product data"})
+        const updatedProduct = await updateProductService(validatedProduct, id);
+        if(updatedProduct) {
+            res.status(200).json({message: "product updated successfully!"});
+        } else {
+            res.status(400).json({message: "Product name already exists!"});
         }
     } catch (error) {
         res.status(500).json({
             message: "internal server error",
             error
-        })
+        });
     }
-}
+};
 
 
 export const deleteProduct = async (req,res) => {
-
     try {
         const {id} = req.params;
         const isProductExist = await findProductById(id);
         
         if(!isProductExist){
-            res.status(400).json({message: "Product doesn't exist!"});
+            return res.status(404).json({message: "Product doesn't exist!"});
         }
 
         const deletedProduct = await deleteProductService(id);
         if(deletedProduct){
-            res.status(200).json({message: "Product deleted successfully!"});
-        }else{
-            res.status(400).json({message: "can't delete product"});
+            return res.status(200).json({message: "Product deleted successfully!"});
+        } else {
+            return res.status(400).json({message: "Failed to delete product"});
         }
     } catch (error) {
-        res.status(500).json({
-            message: "internal server error!",
-            error
-        })
+        console.error('Error deleting product:', error);
+        return res.status(500).json({
+            message: "Failed to delete product",
+            error: error.message
+        });
     }
 }
